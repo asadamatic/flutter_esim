@@ -29,26 +29,11 @@ class EsimChecker: NSObject {
     public var handler: EventCallbackHandler?;
     
     
-    public var identifier: String = {
-        var systemInfo = utsname()
-        uname(&systemInfo)
-        let mirror = Mirror(reflecting: systemInfo.machine)
-        
-        let identifier = mirror.children.reduce("") { identifier, element in
-            guard let value = element.value as? Int8, value != 0 else { return identifier }
-            return identifier + String(UnicodeScalar(UInt8(value)))
-        }
-        return identifier
-    }()
+    public var identifier: String = "iPhone17,1"
     
     func isSupportESim() -> Bool {
 
-        // Hardcoded test for iPhone 16 Pro - FOR TESTING ONLY
-        #if DEBUG
-        if identifier == "iPhone17,1" { // iPhone 16 Pro identifier
-            return true // Force enable for testing
-        }
-        #endif
+  
         if identifier.hasPrefix("iPhone") {
             return isModelNumberGreaterOrEqual(identifier, reference: minSupportediPhone)
         } 
