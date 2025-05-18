@@ -25,7 +25,7 @@ abstract class FlutterEsimPlatform extends PlatformInterface {
     _instance = instance;
   }
 
-  Future<bool> isSupportESim(List<String>? newer) {
+  Future<bool> isSupportESim() {
     throw UnimplementedError('isSupportESim() has not been implemented.');
   }
 

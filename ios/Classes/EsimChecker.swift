@@ -13,81 +13,17 @@ class EsimChecker: NSObject {
     
     
     
-    let internalSupportedModels = [
-        
-        //iPhone 16
-        "iPhone17,1",
-        "iPhone17,2",
-        "iPhone17,3",
-        "iPhone17,4",
-        
-        //iPhone 15
-        "iPhone15,4", //15
-        "iPhone15,5", //15Plus
-        "iPhone16,1", //15Pro
-        "iPhone16,2", //15ProMax
-        
-        //iPhone 14
-        "iPhone14,7", //14
-        "iPhone14,8", //14Plus
-        "iPhone15,2", //14Pro
-        "iPhone15,3", //14ProMax
-        
-        //iPhone 13
-        "iPhone14,5", //13
-        "iPhone14,4", //13Mini
-        "iPhone14,2", //13Pro
-        "iPhone14,3", //13ProMax
-        
-        //iPhone 12
-        "iPhone13,2", //12
-        "iPhone13,1", //12Mini
-        "iPhone13,3", //12Pro
-        "iPhone13,4", //12ProMax
-        
-        //iPhone 11
-        "iPhone12,1", //11
-        "iPhone12,3", //11Pro
-        "iPhone12,5", //11ProMax
-        
-        //iPhone X
-        "iPhone11,2", //XS
-        "iPhone11,4", //XSMAX
-        "iPhone11,6", //XSMAX
-        "iPhone11,8", //XR
-        
-        //iPhone SE
-        "iPhone12,8", //SE2 2020
-        "iPhone14,6", //SE3 2022
-        
-        //iPad
-        "iPad6,8", //iPad Pro 1st Gen (12.9 inch, WiFi+Cellular)
-        "iPad6,12", //iPad 5th Gen (WiFi+Cellular)
-        "iPad7,2", //iPad Pro 2nd Gen (12.9 inch, WiFi+Cellular)
-        "iPad7,4", //iPad Pro 2nd Gen (10.5 inch, WiFi+Cellular)
-        "iPad7,6", //iPad 6th Gen (WiFi+Cellular)
-        "iPad7,12", //iPad 7th Gen (WiFi+Cellular)
-        "iPad8,3", //iPad Pro 3rd Gen (11 inch, WiFi+Cellular)
-        "iPad8,4", //iPad Pro 3rd Gen (11 inch, WiFi+Cellular, 1TB)
-        "iPad8,7", //iPad Pro 3rd Gen (12.9 inch, WiFi+Cellular)
-        "iPad8,8", //iPad Pro 3rd Gen (12.9 inch, WiFi+Cellular, 1TB)
-        "iPad8,10", //iPad Pro 4th Gen (11 inch, WiFi+Cellular)
-        "iPad8,12", //iPad Pro 4th Gen (12.9 inch, WiFi+Cellular)
-        "iPad11,2", //iPad mini 5th Gen (WiFi+Cellular)
-        "iPad11,4", //iPad Air 3rd Gen (WiFi+Cellular)
-        "iPad11,7", //iPad 8th Gen (WiFi+Cellular)
-        "iPad12,2", //iPad 9th Gen (WiFi+Cellular)
-        "iPad13,2", //iPad Air 4th Gen (WiFi+Cellular)
-        "iPad13,6", //iPad Pro 3rd Gen (11 inch, WiFi+Cellular)
-        "iPad13,7", //iPad Pro 3rd Gen (11 inch, WiFi+Cellular)
-        "iPad13,10", //iPad Pro 5th Gen (12.9 inch, WiFi+Cellular)
-        "iPad13,11", //iPad Pro 5th Gen (12.9 inch, WiFi+Cellular)
-        "iPad13,17", //iPad Air 5th Gen (WiFi+Cellular)
-        "iPad13,19", //iPad 10th Gen
-        "iPad14,2", //iPad mini 6th Gen (WiFi+Cellular)
-        "iPad14,4", //iPad Pro 4th Gen (11 inch)
-        "iPad14,6", //iPad Pro 6th Gen (12.9 inch)
-        
+     
+    // Minimum model numbers for eSIM support
+    private let minSupportediPhone = "iPhone11,2" // iPhone XS (first eSIM model)
+    private let minSupportediPad = "iPad6,8"     // iPad Pro 12.9" 1st Gen Cellular
+    
+    // Exceptions (models that shouldn't be supported despite meeting generation requirements)
+    private let unsupportediPadModels: Set<String> = [
+        "iPad6,11", // iPad 5th Gen (2017)
+        "iPad6,12", // iPad 5th Gen (2017)
+        "iPad7,5",  // iPad 6th Gen (2018)
+        "iPad7,6"   // iPad 6th Gen (2018)
     ]
     
     public var handler: EventCallbackHandler?;
@@ -105,16 +41,22 @@ class EsimChecker: NSObject {
         return identifier
     }()
     
-    
-    func isSupportESim(supportedModels: [String]) -> Bool {
-        let newSupportedModels = internalSupportedModels + supportedModels;
-        for model in newSupportedModels {
-            if identifier.contains(model) {
-                return true
-            }
+    func isSupportESim() -> Bool {
+        if identifier.hasPrefix("iPhone") {
+            return isModelNumberGreaterOrEqual(identifier, reference: minSupportediPhone)
+        } 
+        else if identifier.hasPrefix("iPad") {
+            return !unsupportediPadModels.contains(identifier) && 
+                   isModelNumberGreaterOrEqual(identifier, reference: minSupportediPad)
         }
         return false
     }
+    private func isModelNumberGreaterOrEqual(_ model: String, reference: String) -> Bool {
+        let modelGen = model.components(separatedBy: .letters).compactMap { Int($0) }.first ?? 0
+        let refGen = reference.components(separatedBy: .letters).compactMap { Int($0) }.first ?? 0
+        return modelGen >= refGen
+    }
+    
     
     func installEsimProfile(address: String, matchingID: String?, oid: String?, confirmationCode: String?, iccid: String?, eid: String?) {
         let ctpr = CTCellularPlanProvisioningRequest();

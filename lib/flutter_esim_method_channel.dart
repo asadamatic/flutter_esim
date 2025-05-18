@@ -13,9 +13,9 @@ class MethodChannelFlutterEsim extends FlutterEsimPlatform {
   final eventChannel = const EventChannel('flutter_esim_events');
 
   @override
-  Future<bool> isSupportESim(List<String>? newer) async {
+  Future<bool> isSupportESim() async {
     final isSupportESim =
-        await methodChannel.invokeMethod<bool>('isSupportESim', []);
+        await methodChannel.invokeMethod<bool>('isSupportESim');
     return isSupportESim ?? false;
   }
 
