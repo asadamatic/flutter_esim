@@ -42,6 +42,13 @@ class EsimChecker: NSObject {
     }()
     
     func isSupportESim() -> Bool {
+
+        // Hardcoded test for iPhone 16 Pro - FOR TESTING ONLY
+        #if DEBUG
+        if identifier == "iPhone17,1" { // iPhone 16 Pro identifier
+            return true // Force enable for testing
+        }
+        #endif
         if identifier.hasPrefix("iPhone") {
             return isModelNumberGreaterOrEqual(identifier, reference: minSupportediPhone)
         } 
